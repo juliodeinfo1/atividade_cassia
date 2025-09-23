@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Sistema Urinário Interativo</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background: #f4f4f4;
+			margin: 0;
+			padding: 0;
+		}
+		.container {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 30px;
+			justify-content: center;
+			margin-top: 40px;
+		}
+		.parte {
+			position: relative;
+			display: inline-block;
+			cursor: pointer;
+			transition: transform 0.2s;
+		}
+		.parte:hover {
+			transform: scale(1.08);
+			z-index: 2;
+			box-shadow: 0 0 15px #0077ff55;
+		}
+		.tooltip {
+			display: none;
+			position: absolute;
+			top: 100%;
+			left: 50%;
+			transform: translateX(-50%);
+			background: #fff;
+			color: #222;
+			border: 1px solid #0077ff;
+			border-radius: 8px;
+			padding: 10px 16px;
+			box-shadow: 0 2px 8px #0002;
+			white-space: pre-line;
+			min-width: 180px;
+			font-size: 1rem;
+		}
+		.parte:hover .tooltip {
+			display: block;
+		}
+		.parte img {
+			width: 120px;
+			height: auto;
+			border-radius: 10px;
+			border: 2px solid #0077ff33;
+		}
+	</style>
+</head>
+<body>
+	<h1 style="text-align:center; margin-top:20px;">Sistema Urinário Interativo</h1>
+	<div class="container">
+		<div class="parte">
+			<img src="https://via.placeholder.com/120x180?text=Rim" alt="Rim">
+			<div class="tooltip">
+				<strong>Rim</strong>\nFiltra o sangue, removendo resíduos e excesso de água para formar a urina.
+			</div>
+		</div>
+		<div class="parte">
+			<img src="https://via.placeholder.com/120x180?text=Ureter" alt="Ureter">
+			<div class="tooltip">
+				<strong>Ureter</strong>\nTransporta a urina dos rins até a bexiga.
+			</div>
+		</div>
+		<div class="parte">
+			<img src="https://via.placeholder.com/120x180?text=Bexiga" alt="Bexiga">
+			<div class="tooltip">
+				<strong>Bexiga</strong>\nArmazena a urina até o momento da eliminação.
+			</div>
+		</div>
+		<div class="parte">
+			<img src="https://via.placeholder.com/120x180?text=Uretra" alt="Uretra">
+			<div class="tooltip">
+				<strong>Uretra</strong>\nCanal por onde a urina é eliminada do corpo.
+			</div>
+		</div>
+	</div>
+</body>
+</html>
