@@ -5,9 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Urinário Interativo</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; min-height:100vh; }
-        .container { display:flex; justify-content:center; margin-top:40px; position:relative; }
-        .image-wrap { position: relative; max-width:400px; width:100%; }
+        /* fundo rosa com gradiente */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height:100vh;
+            background: linear-gradient(180deg, #ffd7e6 0%, #ffc0da 50%, #ffb6d5 100%);
+            overflow-x: hidden;
+        }
+
+        /* container principal acima das animações */
+        .container { display:flex; justify-content:center; margin-top:40px; position:relative; z-index: 2; }
+        .image-wrap { position: relative; max-width:400px; width:100%; z-index: 2; }
         .image-wrap img { display:block; width:100%; height:auto; border-radius:12px; border:2px solid #0077ff33; }
 
         /* hotspots responsivos (use porcentagens para posicionar) */
@@ -20,8 +30,9 @@
             box-shadow: 0 1px 6px rgba(0,0,0,0.25);
             transform: translate(-50%, -50%);
             cursor: pointer;
+            z-index: 3;
+            background: rgba(0,123,255,0.85);
         }
-        .hotspot.kidney { background: rgba(0,123,255,0.85); } /* marcador genérico */
         .hotspot.vein { background: rgba(0,122,204,0.95); border-color: #003f7f; } /* azul */
         .hotspot.artery { background: rgba(220,20,60,0.95); border-color: #7f0000; } /* vermelho */
 
@@ -43,15 +54,55 @@
         }
 
         /* legenda */
-        .legend { display:flex; gap:12px; justify-content:center; margin-top:14px; font-size:0.95rem; }
+        .legend { display:flex; gap:12px; justify-content:center; margin-top:14px; font-size:0.95rem; z-index: 2; position: relative; }
         .legend span { display:flex; gap:8px; align-items:center; }
         .swatch { width:14px; height:14px; border-radius:3px; display:inline-block; }
         .swatch.vein { background:#0066cc; }
         .swatch.artery { background:#dc143c; }
+
+        /* container de emojis (fundo animado) */
+        .emoji-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+        .emoji {
+            position: absolute;
+            top: -6%;
+            will-change: transform, opacity;
+            user-select: none;
+            -webkit-user-select: none;
+            font-size: 24px;
+            opacity: 0.95;
+            animation-name: fall, sway, fadeout;
+            animation-timing-function: linear;
+            animation-iteration-count: 1;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(110vh); }
+        }
+        @keyframes sway {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+            100% { transform: translateX(0); }
+        }
+        @keyframes fadeout {
+            0% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* respeita preferências de redução de movimento */
+        @media (prefers-reduced-motion: reduce) {
+            .emoji { animation: none; display: none; }
+        }
     </style>
 </head>
 <body>
-    <h1 style="text-align:center; margin-top:20px;">Sistema Urinário Interativo</h1>
+    <h1 style="text-align:center; margin-top:20px; z-index:2; position:relative;">Sistema Urinário Interativo</h1>
 
     <div class="container">
         <div class="image-wrap" id="img-wrap" style="position:relative;">
@@ -79,11 +130,11 @@
             <button class="hotspot kidney" data-info="<strong>Uretra</strong><br>Canal que conduz a urina da bexiga para exterior."
                 style="left:50%; top:86%;" aria-label="Uretra"></button>
 
-            <!-- VEIA RENAL (azul) - exemplo próximo ao rim esquerdo -->
+            <!-- VEIA RENAL (azul) -->
             <button class="hotspot vein" data-info="<strong>Veia Renal</strong><br>Transporta o sangue filtrado do rim de volta para a circulação sistémica. Representada em azul."
                 style="left:47%; top:24%;" aria-label="Veia Renal"></button>
 
-            <!-- ARTÉRIA RENAL (vermelha) - exemplo próximo ao rim esquerdo -->
+            <!-- ARTÉRIA RENAL (vermelha) -->
             <button class="hotspot artery" data-info="<strong>Artéria Renal</strong><br>Fornece sangue arterial rico em oxigénio e nutrientes ao rim para filtração. Representada em vermelho."
                 style="left:53%; top:24%;" aria-label="Artéria Renal"></button>
 
@@ -96,6 +147,9 @@
         <span><span class="swatch artery"></span> Artéria Renal (vermelha)</span>
     </div>
 
+    <!-- container que recebe emojis caindo -->
+    <div class="emoji-bg" id="emoji-bg" aria-hidden="true"></div>
+
     <script>
         // teste de carregamento da imagem e aplicação segura do src (evita problemas com espaços)
         (function(){
@@ -104,18 +158,66 @@
             const raw = img.dataset.src || 'imagens/sistema.png';
             const encoded = raw.split('/').map(encodeURIComponent).join('/');
             const tester = new Image();
-            tester.onload = () => {
-                img.src = encoded;
-                console.log('Imagem carregada:', encoded);
-            };
+            tester.onload = () => { img.src = encoded; console.log('Imagem carregada:', encoded); };
             tester.onerror = () => {
                 console.error('Falha ao carregar imagem:', raw);
-                // opcional: mostrar placeholder embutido (pequeno SVG) para não deixar espaço vazio
                 img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240"><rect width="100%" height="100%" fill="%23f4f4f4"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23777" font-size="16">Imagem não encontrada</text></svg>';
             };
             tester.src = encoded;
         })();
     </script>
+
+    <script>
+        // animação de emojis caindo aleatoriamente
+        (function(){
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const container = document.getElementById('emoji-bg');
+            const emojis = ['❤️','⭐'];
+            const minInterval = 300; // ms
+            const maxInterval = 900; // ms
+            const minSize = 18;
+            const maxSize = 48;
+
+            function rand(min, max){ return Math.random()*(max-min)+min; }
+
+            function spawnEmoji() {
+                const el = document.createElement('div');
+                el.className = 'emoji';
+                el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+                const size = Math.round(rand(minSize, maxSize));
+                el.style.fontSize = size + 'px';
+                // posição horizontal aleatória
+                el.style.left = rand(2, 98) + '%';
+                // rotação aleatória
+                el.style.transform = `rotate(${rand(-30,30)}deg)`;
+                // duração e horizontal sway customizada via inline animation
+                const duration = rand(3500, 7000); // ms
+                const swayDuration = rand(1200, 3000);
+                el.style.animationDuration = `${duration}ms, ${swayDuration}ms, ${duration}ms`;
+                // opacity variante
+                el.style.opacity = rand(0.75, 1);
+                container.appendChild(el);
+
+                // remove após terminar a animação
+                setTimeout(()=> {
+                    if (el && el.parentNode) el.parentNode.removeChild(el);
+                }, duration + 100);
+            }
+
+            // loop de spawn em intervalos aleatórios
+            let running = true;
+            (function loop(){
+                if (!running) return;
+                spawnEmoji();
+                const next = rand(minInterval, maxInterval);
+                setTimeout(loop, next);
+            })();
+
+            // expõe controle básico (se necessário)
+            window._emojiRain = { stop: ()=> running = false, start: ()=> { if (!running){ running = true; loop(); } } };
+        })();
+    </script>
+
     <script>
         (function(){
             const wrap = document.getElementById('img-wrap');
@@ -125,18 +227,14 @@
             function showTip(html, x, y) {
                 tooltip.innerHTML = html;
                 tooltip.style.display = 'block';
-                // posiciona relativo ao container da imagem
                 const rect = wrap.getBoundingClientRect();
                 const left = x - rect.left + 12;
                 const top = y - rect.top + 12;
-                // evita overflow
                 tooltip.style.left = Math.max(8, Math.min(left, rect.width - 8 - tooltip.offsetWidth)) + 'px';
                 tooltip.style.top = Math.max(8, Math.min(top, rect.height - 8 - tooltip.offsetHeight)) + 'px';
             }
 
-            function hideTip() {
-                tooltip.style.display = 'none';
-            }
+            function hideTip() { tooltip.style.display = 'none'; }
 
             hotspots.forEach(h => {
                 h.addEventListener('mousemove', (e) => {
@@ -145,7 +243,6 @@
                 });
                 h.addEventListener('mouseleave', hideTip);
                 h.addEventListener('click', (e) => {
-                    // em dispositivos touch: mostrar tooltip no clique por 3s
                     const info = h.dataset.info || h.getAttribute('aria-label') || '';
                     const rect = h.getBoundingClientRect();
                     showTip(info, rect.left + rect.width/2, rect.top + rect.height/2);
@@ -153,9 +250,8 @@
                 });
             });
 
-            // esconde tooltip se mouse sair da imagem
             const img = document.getElementById('sistema-img');
-            img.addEventListener('mouseleave', hideTip);
+            if (img) img.addEventListener('mouseleave', hideTip);
         })();
     </script>
 </body>
