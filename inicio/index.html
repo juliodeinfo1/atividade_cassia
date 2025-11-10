@@ -6,25 +6,88 @@
     <title>Sistema Urinário Interativo</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; min-height:100vh; }
-        .container { display:flex; justify-content:center; margin-top:40px; }
+        .container { display:flex; justify-content:center; margin-top:40px; position:relative; }
         img { max-width:400px; width:100%; height:auto; border-radius:12px; border:2px solid #0077ff33; display:block; }
+        /* tooltip */
+        #tooltip {
+            display: none;
+            position: absolute;
+            background: #fff;
+            color: #111;
+            border: 1px solid #0077ff;
+            border-radius: 8px;
+            padding: 10px 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+            z-index: 50;
+            max-width: 240px;
+            font-size: 0.95rem;
+            line-height: 1.3;
+        }
     </style>
 </head>
 <body>
     <h1 style="text-align:center; margin-top:20px;">Sistema Urinário Interativo</h1>
 
     <div class="container">
-        <div>
+        <div style="position:relative;">
             <!-- Imagem localizada em inicio/imagens/ -->
             <img src="sistema.png" alt="Sistema Urinário" id="sistema-img" usemap="#mapa-sistema">
             <map name="mapa-sistema">
-                <area shape="circle" coords="110,90,35" href="#" alt="Rim Esquerdo" title="Rim Esquerdo">
-                <area shape="circle" coords="270,90,35" href="#" alt="Rim Direito" title="Rim Direito">
-                <area shape="rect" coords="160,120,200,180" href="#" alt="Ureter" title="Ureter">
-                <area shape="circle" coords="180,320,30" href="#" alt="Bexiga" title="Bexiga">
-                <area shape="rect" coords="180,360,220,390" href="#" alt="Uretra" title="Uretra">
+                <area shape="circle" coords="110,90,35" href="#" alt="Rim Esquerdo" title="Rim Esquerdo"
+                    data-info="<strong>Rim Esquerdo</strong><br>Filtra o sangue para remover resíduos e excesso de água, formando a urina. Também regula eletrólitos e pressão arterial.">
+                <area shape="circle" coords="270,90,35" href="#" alt="Rim Direito" title="Rim Direito"
+                    data-info="<strong>Rim Direito</strong><br>Mesma função do rim esquerdo: filtra o sangue, remove resíduos, equilibra fluidos e produz hormônios (ex.: eritropoietina).">
+                <area shape="rect" coords="160,120,200,180" href="#" alt="Ureter" title="Ureter"
+                    data-info="<strong>Ureter</strong><br>Tubos que transportam a urina dos rins até a bexiga por meio de contrações musculares (peristalse).">
+                <area shape="circle" coords="180,320,30" href="#" alt="Bexiga" title="Bexiga"
+                    data-info="<strong>Bexiga</strong><br>Órgão que armazena a urina até o momento da micção; sua parede se contrai para expulsar a urina pela uretra.">
+                <area shape="rect" coords="180,360,220,390" href="#" alt="Uretra" title="Uretra"
+                    data-info="<strong>Uretra</strong><br>Canal que conduz a urina da bexiga para fora do corpo. Em homens também transporta sêmen.">
+                <!-- Veia e Artéria renal (pequenas áreas aproximadas) -->
+                <area shape="circle" coords="150,105,12" href="#" alt="Veia Renal" title="Veia Renal"
+                    data-info="<strong>Veia Renal</strong><br>Transporta o sangue já filtrado pelo rim de volta para a circulação sistémica. Geralmente representada em azul.">
+                <area shape="circle" coords="170,105,12" href="#" alt="Artéria Renal" title="Artéria Renal"
+                    data-info="<strong>Artéria Renal</strong><br>Fornece sangue arterial rico em oxigénio e nutrientes ao rim para que ocorra a filtração. Geralmente representada em vermelho.">
             </map>
+
+            <div id="tooltip" aria-hidden="true"></div>
         </div>
     </div>
+
+    <script>
+        (function(){
+            const img = document.getElementById('sistema-img');
+            const tooltip = document.getElementById('tooltip');
+            const areas = document.querySelectorAll('map[name="mapa-sistema"] area');
+
+            function showTip(html, x, y) {
+                tooltip.innerHTML = html;
+                tooltip.style.display = 'block';
+                // posiciona o tooltip relativo ao container da imagem
+                const containerRect = img.getBoundingClientRect();
+                const left = x - containerRect.left + 12;
+                const top = y - containerRect.top + 12;
+                // limita para não sair da imagem
+                tooltip.style.left = Math.max(8, Math.min(left, containerRect.width - 8 - tooltip.offsetWidth)) + 'px';
+                tooltip.style.top = Math.max(8, Math.min(top, containerRect.height - 8 - tooltip.offsetHeight)) + 'px';
+            }
+
+            function hideTip() {
+                tooltip.style.display = 'none';
+            }
+
+            areas.forEach(area => {
+                area.addEventListener('mousemove', (e) => {
+                    const info = area.dataset.info || area.title || area.alt || '';
+                    showTip(info, e.clientX, e.clientY);
+                });
+                area.addEventListener('mouseleave', hideTip);
+                area.addEventListener('click', (e) => { e.preventDefault(); }); // evita navegação #
+            });
+
+            // esconde tooltip se o mouse sair da imagem
+            img.addEventListener('mouseleave', hideTip);
+        })();
+    </script>
 </body>
 </html>
