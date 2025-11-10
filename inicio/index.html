@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Urinário Interativo</title>
     <style>
-        /* fundo rosa com gradiente */
+        /* fundo rosa sólido */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             min-height:100vh;
-            background: linear-gradient(180deg, #ffd7e6 0%, #ffc0da 50%, #ffb6d5 100%);
+            background: #ffc0da;
             overflow-x: hidden;
         }
 
-        /* container principal acima das animações */
+        /* container principal */
         .container { display:flex; justify-content:center; margin-top:40px; position:relative; z-index: 2; }
         .image-wrap { position: relative; max-width:400px; width:100%; z-index: 2; }
         .image-wrap img { display:block; width:100%; height:auto; border-radius:12px; border:2px solid #0077ff33; }
@@ -59,46 +59,6 @@
         .swatch { width:14px; height:14px; border-radius:3px; display:inline-block; }
         .swatch.vein { background:#0066cc; }
         .swatch.artery { background:#dc143c; }
-
-        /* container de emojis (fundo animado) */
-        .emoji-bg {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 0;
-        }
-        .emoji {
-            position: absolute;
-            top: -6%;
-            will-change: transform, opacity;
-            user-select: none;
-            -webkit-user-select: none;
-            font-size: 24px;
-            opacity: 0.95;
-            animation-name: fall, sway, fadeout;
-            animation-timing-function: linear;
-            animation-iteration-count: 1;
-        }
-
-        @keyframes fall {
-            to { transform: translateY(110vh); }
-        }
-        @keyframes sway {
-            0% { transform: translateX(0); }
-            50% { transform: translateX(20px); }
-            100% { transform: translateX(0); }
-        }
-        @keyframes fadeout {
-            0% { opacity: 1; }
-            85% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        /* respeita preferências de redução de movimento */
-        @media (prefers-reduced-motion: reduce) {
-            .emoji { animation: none; display: none; }
-        }
     </style>
 </head>
 <body>
@@ -147,9 +107,6 @@
         <span><span class="swatch artery"></span> Artéria Renal (vermelha)</span>
     </div>
 
-    <!-- container que recebe emojis caindo -->
-    <div class="emoji-bg" id="emoji-bg" aria-hidden="true"></div>
-
     <script>
         // teste de carregamento da imagem e aplicação segura do src (evita problemas com espaços)
         (function(){
@@ -164,57 +121,6 @@
                 img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240"><rect width="100%" height="100%" fill="%23f4f4f4"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23777" font-size="16">Imagem não encontrada</text></svg>';
             };
             tester.src = encoded;
-        })();
-    </script>
-
-    <script>
-        // animação de emojis caindo aleatoriamente
-        (function(){
-            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-            const container = document.getElementById('emoji-bg');
-            const emojis = ['❤️','⭐'];
-            const minInterval = 300; // ms
-            const maxInterval = 900; // ms
-            const minSize = 18;
-            const maxSize = 48;
-
-            function rand(min, max){ return Math.random()*(max-min)+min; }
-
-            function spawnEmoji() {
-                const el = document.createElement('div');
-                el.className = 'emoji';
-                el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-                const size = Math.round(rand(minSize, maxSize));
-                el.style.fontSize = size + 'px';
-                // posição horizontal aleatória
-                el.style.left = rand(2, 98) + '%';
-                // rotação aleatória
-                el.style.transform = `rotate(${rand(-30,30)}deg)`;
-                // duração e horizontal sway customizada via inline animation
-                const duration = rand(3500, 7000); // ms
-                const swayDuration = rand(1200, 3000);
-                el.style.animationDuration = `${duration}ms, ${swayDuration}ms, ${duration}ms`;
-                // opacity variante
-                el.style.opacity = rand(0.75, 1);
-                container.appendChild(el);
-
-                // remove após terminar a animação
-                setTimeout(()=> {
-                    if (el && el.parentNode) el.parentNode.removeChild(el);
-                }, duration + 100);
-            }
-
-            // loop de spawn em intervalos aleatórios
-            let running = true;
-            (function loop(){
-                if (!running) return;
-                spawnEmoji();
-                const next = rand(minInterval, maxInterval);
-                setTimeout(loop, next);
-            })();
-
-            // expõe controle básico (se necessário)
-            window._emojiRain = { stop: ()=> running = false, start: ()=> { if (!running){ running = true; loop(); } } };
         })();
     </script>
 
