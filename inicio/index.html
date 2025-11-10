@@ -55,8 +55,8 @@
 
     <div class="container">
         <div class="image-wrap" id="img-wrap" style="position:relative;">
-            <!-- imagem em inicio/imagens -->
-            <img src="imagens/sistema.png" alt="Sistema Urinário" id="sistema-img">
+            <!-- imagem em inicio/imagens (agora carregada via data-src com teste) -->
+            <img data-src="imagens/sistema.png" src="" alt="Sistema Urinário" id="sistema-img">
 
             <!-- hotspots posicionados com porcentagens (ajuste fino conforme necessário) -->
             <!-- RIM ESQUERDO -->
@@ -96,6 +96,26 @@
         <span><span class="swatch artery"></span> Artéria Renal (vermelha)</span>
     </div>
 
+    <script>
+        // teste de carregamento da imagem e aplicação segura do src (evita problemas com espaços)
+        (function(){
+            const img = document.getElementById('sistema-img');
+            if (!img) return;
+            const raw = img.dataset.src || 'imagens/sistema.png';
+            const encoded = raw.split('/').map(encodeURIComponent).join('/');
+            const tester = new Image();
+            tester.onload = () => {
+                img.src = encoded;
+                console.log('Imagem carregada:', encoded);
+            };
+            tester.onerror = () => {
+                console.error('Falha ao carregar imagem:', raw);
+                // opcional: mostrar placeholder embutido (pequeno SVG) para não deixar espaço vazio
+                img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240"><rect width="100%" height="100%" fill="%23f4f4f4"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23777" font-size="16">Imagem não encontrada</text></svg>';
+            };
+            tester.src = encoded;
+        })();
+    </script>
     <script>
         (function(){
             const wrap = document.getElementById('img-wrap');
