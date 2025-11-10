@@ -1,144 +1,47 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Sistema Urinário Interativo</title>
-	<style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Urinário Interativo</title>
+    <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background: #f4f4f4;
             min-height: 100vh;
-            /* background será definido por JS; mantém cor de fallback */
-            background-color: #f4f4f4;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
         }
-        /* overlay para manter legibilidade sobre o background */
-        .bg-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(244,244,244,0.75);
-            pointer-events: none;
-            z-index: 0;
+        .container {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
         }
-		.container {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 30px;
-			justify-content: center;
-			margin-top: 40px;
-			position: relative;
-			z-index: 1; /* acima do overlay */
-		}
-		.parte {
-			position: relative;
-			display: inline-block;
-			cursor: pointer;
-			transition: transform 0.2s;
-		}
-		.parte:hover {
-			transform: scale(1.08);
-			z-index: 2;
-			box-shadow: 0 0 15px #0077ff55;
-		}
-		.tooltip {
-			display: none;
-			position: absolute;
-			top: 100%;
-			left: 50%;
-			transform: translateX(-50%);
-			background: #fff;
-			color: #222;
-			border: 1px solid #0077ff;
-			border-radius: 8px;
-			padding: 10px 16px;
-			box-shadow: 0 2px 8px #0002;
-			white-space: pre-line;
-			min-width: 180px;
-			font-size: 1rem;
-		}
-		.parte:hover .tooltip {
-			display: block;
-		}
-		.parte img {
-			max-width: 400px;
-			width: 100%;
-			height: auto;
-			border-radius: 12px;
-			border: 2px solid #0077ff33;
-			display: block;
-		}
-	</style>
+        img {
+            max-width: 400px;
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            border: 2px solid #0077ff33;
+            display: block;
+        }
+    </style>
 </head>
 <body>
-	<h1 style="text-align:center; margin-top:20px;">Sistema Urinário Interativo</h1>
-	<div style="display: flex; justify-content: center; margin-top: 40px;">
-		<div style="position: relative; display: inline-block;">
-			<!-- imagem agora definida via data-src e carregada por JS (tratamento de espaços por segmento) -->
-            <img data-src="imagens/Sistema completo.png" src="" alt="Sistema Urinário" usemap="#mapa-sistema" id="sistema-img">
+    <h1 style="text-align:center; margin-top:20px;">Sistema Urinário Interativo</h1>
+
+    <div class="container">
+        <div>
+            <!-- Imagem localizada em inicio/imagens/ -->
+            <img src="imagens/Sistema completo.png" alt="Sistema Urinário" id="sistema-img" usemap="#mapa-sistema">
             <map name="mapa-sistema">
-                <area shape="circle" coords="110,90,35" href="#" alt="Rim Esquerdo" data-info="<strong>Rim Esquerdo</strong><br>Filtra o sangue, removendo resíduos e excesso de água para formar a urina.">
-                <area shape="circle" coords="270,90,35" href="#" alt="Rim Direito" data-info="<strong>Rim Direito</strong><br>Filtra o sangue, removendo resíduos e excesso de água para formar a urina.">
-                <area shape="rect" coords="160,120,200,180" href="#" alt="Ureter" data-info="<strong>Ureter</strong><br>Transporta a urina dos rins até a bexiga.">
-                <area shape="circle" coords="180,320,30" href="#" alt="Bexiga" data-info="<strong>Bexiga</strong><br>Armazena a urina até o momento da eliminação.">
-                <area shape="rect" coords="180,360,220,390" href="#" alt="Uretra" data-info="<strong>Uretra</strong><br>Canal por onde a urina é eliminada do corpo.">
-                <!-- Veia renal (azul) -->
-                <area shape="circle" coords="150,105,12" href="#" alt="Veia Renal (azul)" data-info="<strong>Veia Renal (azul)</strong><br>Transporta o sangue filtrado do rim de volta para a circulação. Geralmente representada em azul por transportar sangue venoso.">
-                <!-- Artéria renal (vermelha) -->
-                <area shape="circle" coords="170,105,12" href="#" alt="Artéria Renal (vermelha)" data-info="<strong>Artéria Renal (vermelha)</strong><br>Fornece sangue rico em oxigénio ao rim. Geralmente representada em vermelho por transportar sangue arterial.">
+                <area shape="circle" coords="110,90,35" href="#" alt="Rim Esquerdo" title="Rim Esquerdo">
+                <area shape="circle" coords="270,90,35" href="#" alt="Rim Direito" title="Rim Direito">
+                <area shape="rect" coords="160,120,200,180" href="#" alt="Ureter" title="Ureter">
+                <area shape="circle" coords="180,320,30" href="#" alt="Bexiga" title="Bexiga">
+                <area shape="rect" coords="180,360,220,390" href="#" alt="Uretra" title="Uretra">
             </map>
-            <div id="tooltip" style="display:none; position:absolute; background:#fff; color:#222; border:1px solid #0077ff; border-radius:8px; padding:10px 16px; box-shadow:0 2px 8px #0002; min-width:180px; font-size:1rem; z-index:10;"></div>
         </div>
     </div>
-
-    <!-- overlay para legibilidade do conteúdo sobre o background -->
-    <div class="bg-overlay" aria-hidden="true"></div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const img = document.getElementById('sistema-img');
-            const tooltip = document.getElementById('tooltip');
-            const areas = document.getElementsByTagName('area');
-
-            // Constrói URL codificando cada segmento do caminho (preserva '/')
-            const rawPath = img.dataset.src || 'imagens/Sistema completo.png';
-            const encodedPath = rawPath.split('/').map(encodeURIComponent).join('/');
-
-            // Verifica se a imagem existe antes de aplicar como src/background
-            const tester = new Image();
-            tester.onload = () => {
-                // aplica na tag img (mapa dependerá do tamanho real; ajuste coords se necessário)
-                img.src = encodedPath;
-                // aplica como background do body
-                document.body.style.backgroundImage = `url("${encodedPath}")`;
-            };
-            tester.onerror = () => {
-                console.error('Imagem não encontrada em:', rawPath, '(tente renomear para sem espaços ou confirme o caminho)');
-                // tenta fallback simples (percent-encoding completo)
-                const fallback = encodeURI(rawPath);
-                img.src = fallback;
-                document.body.style.backgroundImage = `url("${fallback}")`;
-            };
-            tester.src = encodedPath;
-
-            for (let area of areas) {
-                area.addEventListener('mousemove', function(e) {
-                    tooltip.innerHTML = area.dataset.info;
-                    tooltip.style.display = 'block';
-                    // Posição do mouse relativa à imagem
-                    const rect = img.getBoundingClientRect();
-                    tooltip.style.left = (e.clientX - rect.left + 10) + 'px';
-                    tooltip.style.top = (e.clientY - rect.top + 10) + 'px';
-                });
-                area.addEventListener('mouseleave', function() {
-                    tooltip.style.display = 'none';
-                });
-            }
-        });
-    </script>
 </body>
 </html>
